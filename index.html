@@ -10,101 +10,95 @@
             --pink: #ff69b4;
             --dark-pink: #ff1493;
             --bg: #000;
-            --book-w: clamp(160px, 45vw, 400px); 
-            --book-h: clamp(250px, 65vh, 550px);
+            --book-w: clamp(280px, 85vw, 420px); 
+            --book-h: clamp(400px, 75vh, 580px);
         }
         
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        * { box-sizing: border-box; margin: 0; padding: 0; touch-action: manipulation; }
         
         body { 
             background: var(--bg); overflow: hidden; 
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            height: 100vh; direction: ltr; 
+            height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center;
         }
 
-        /* شاشة الدخول */
+        /* ================= 1. شاشة الدخول ================= */
         #welcome-screen {
             position: fixed; inset: 0; background: #000; z-index: 10000;
             display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 30px;
         }
         .welcome-btn {
-            padding: 15px 35px; font-size: 1.2rem; font-weight: bold;
-            color: #fff; background: transparent; border: 2px solid var(--pink);
-            border-radius: 50px; cursor: pointer; transition: 0.3s;
-            box-shadow: 0 0 20px var(--pink);
+            padding: 15px 35px; font-size: clamp(1.4rem, 5vw, 2.2rem); font-weight: 900;
+            color: #fff; background: transparent; border: 3px solid var(--pink);
+            border-radius: 60px; cursor: pointer; box-shadow: 0 0 25px var(--pink); text-transform: uppercase;
         }
 
-        /* مشغل الموسيقى */
+        /* ================= 2. مشغل الموسيقى ================= */
         .music-player {
-            background: rgba(255, 105, 180, 0.2); padding: 10px 15px; border-radius: 50px;
-            display: flex; gap: 10px; border: 1px solid var(--pink); backdrop-filter: blur(5px);
+            background: rgba(255, 105, 180, 0.2); padding: 10px 20px; border-radius: 50px;
+            display: flex; gap: 15px; border: 1px solid var(--pink);
+            backdrop-filter: blur(10px); z-index: 1001; margin-top: 20px;
         }
-        .music-player button { background: var(--pink); border: none; color: white; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; }
-        .music-player.fixed-bottom { position: fixed; bottom: 20px; right: 20px; z-index: 1001; }
+        .music-player button { background: var(--pink); border: none; color: white; width: 38px; height: 38px; border-radius: 50%; cursor: pointer; font-size: 1.1rem; }
 
-        /* شاشة العد التنازلي */
+        /* ================= 3. الماتريكس والعد التنازلي ================= */
         #intro-screen {
             position: fixed; inset: 0; background: #000; z-index: 9999;
             display: none; align-items: center; justify-content: center;
         }
-        #matrix-canvas { position: absolute; inset: 0; opacity: 0.6; }
-        #intro-text {
-            position: relative; font-size: clamp(2.5rem, 8vw, 5rem); font-weight: 900;
-            color: var(--pink); text-shadow: 0 0 20px var(--dark-pink); text-align: center;
-        }
+        #matrix-canvas { position: absolute; inset: 0; opacity: 0.4; }
+        #intro-text { position: relative; font-size: clamp(1.8rem, 8vw, 4rem); font-weight: 900; color: var(--pink); text-align: center; padding: 15px; }
 
-        /* النجوم والكتاب */
+        /* ================= 4. النوت بوك (الحل الجذري للتداخل) ================= */
         #stars-canvas { position: fixed; inset: 0; z-index: 1; pointer-events: none; }
         .main-content {
-            position: relative; width: 100%; height: 100vh; z-index: 10;
-            display: none; align-items: center; justify-content: center; opacity: 0; transition: opacity 1s;
+            position: relative; z-index: 10; display: none; flex-direction: column; align-items: center; opacity: 0; transition: opacity 1s;
         }
-        .book-container { position: relative; width: var(--book-w); height: var(--book-h); perspective: 2000px; transform: translateX(50%); }
-        .book { width: 100%; height: 100%; position: relative; transform-style: preserve-3d; }
+        .book-container { 
+            position: relative; width: var(--book-w); height: var(--book-h); 
+        }
+        .book { width: 100%; height: 100%; position: relative; }
         
         .page {
-            position: absolute; inset: 0; transform-origin: left;
-            transform-style: preserve-3d; transition: transform 1s cubic-bezier(0.645, 0.045, 0.355, 1);
-            cursor: pointer; -webkit-transform-style: preserve-3d;
+            position: absolute; inset: 0; border-radius: 15px; overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.8); border: 2px solid #333;
+            transition: transform 0.6s ease-in-out, opacity 0.4s ease-in-out;
+            background-color: #111; /* خلفية صلبة تمنع الشفافية تماماً */
         }
+
+        .photo-layer { width: 100%; height: 100%; position: absolute; z-index: 1; background-color: #222; }
+        .photo-layer img { width: 100%; height: 100%; object-fit: cover; }
         
-        .front, .back {
-            position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden;
-            display: flex; flex-direction: column; border: 1px solid #ddd;
+        .overlay { 
+            position: absolute; inset: 0; background: rgba(0, 0, 0, 0.5); z-index: 2; 
         }
-        
-        /* تنسيق صفحات الصور */
-        .page:not(.cover-front):not(.end-page) .front {
-            padding: 0; background-size: cover; background-position: center; border-radius: 0 15px 15px 0;
-        }
-        
-        /* تنسيق صفحات الشعر */
-        .back, .quote-page { 
-            background: #fffafc; border-radius: 15px 0 0 15px;
+
+        .content-layer {
+            position: absolute; inset: 0; z-index: 3;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            text-align: center; padding: 25px; direction: rtl;
-            font-size: clamp(0.75rem, 2.1vw, 1.25rem); color: #222; line-height: 1.6; font-weight: 600;
+            padding: 25px; text-align: center; color: white; direction: rtl;
+        }
+        .quote-text { 
+            font-size: clamp(1.1rem, 4.5vw, 1.5rem); 
+            line-height: 1.8; font-weight: 700; 
+            text-shadow: 2px 2px 6px #000;
         }
 
-        .front { background: #fff; z-index: 2; transform: translateZ(1px); border-radius: 0 15px 15px 0; }
-        .back { transform: rotateY(-180deg) translateZ(1px); z-index: 1; }
-
-        .cover-front .front { background: linear-gradient(135deg, #111, #333); border: 2px solid var(--pink); color: var(--pink); }
-        .cover-front .front h1 { font-size: clamp(2.5rem, 7vw, 4rem); text-shadow: 0 0 15px var(--pink); }
-        
-        .page.flipped { transform: rotateY(-180deg); }
-
-        /* الانفجار */
-        #heart-container { position: fixed; top: 40%; left: 50%; z-index: 50; display: none; }
+        /* ================= 5. القلوب (أصغر وملمومة جداً) ================= */
+        #heart-container { position: fixed; top: 45%; left: 50%; z-index: 50; display: none; }
         .heart-img {
-            position: absolute; width: clamp(50px, 10vw, 70px); height: clamp(50px, 10vw, 70px); border-radius: 12px;
-            object-fit: cover; border: 2px solid #fff; opacity: 0; transition: all 1.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: absolute; 
+            width: clamp(20px, 5vw, 35px); height: clamp(20px, 5vw, 35px); /* تصغير ملحوظ */
+            border-radius: 5px; object-fit: cover; border: 1.5px solid #fff; 
+            box-shadow: 0 0 8px var(--pink); opacity: 0; transition: all 1s ease-out;
+            transform: translate(-50%, -50%);
         }
-        @keyframes heartPulse { 0%, 100% { transform: scale(1) translate(-50%, -50%); } 50% { transform: scale(1.1) translate(-50%, -50%); } }
-        .pulsing { animation: heartPulse 2s infinite ease-in-out; }
+        
         #back-to-book-btn {
-            position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%);
-            padding: 12px 30px; background: var(--pink); border: none; color: white; border-radius: 30px; cursor: pointer; display: none; z-index: 2000; font-weight: bold;
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+            padding: 10px 25px; background: var(--pink); border: none; font-weight: bold;
+            color: white; border-radius: 30px; cursor: pointer; display: none; z-index: 2000;
+            box-shadow: 0 0 15px var(--dark-pink);
         }
     </style>
 </head>
@@ -134,7 +128,7 @@
     </div>
 
     <div id="heart-container"></div>
-    <button id="back-to-book-btn" onclick="returnToNotebook()">العودة للكتاب</button>
+    <button id="back-to-book-btn" onclick="returnToNotebook()">العودة للنوت بوك</button>
 
     <script>
         const audio = document.getElementById('audio');
@@ -144,8 +138,7 @@
         function startExperience() {
             document.getElementById('welcome-screen').style.display = 'none';
             const player = document.getElementById('main-player');
-            document.body.appendChild(player);
-            player.classList.add('fixed-bottom');
+            document.getElementById('main-content').appendChild(player);
             audio.play().catch(() => {});
             document.getElementById('pBtn').innerText = "⏸";
             document.getElementById('intro-screen').style.display = 'flex';
@@ -154,154 +147,173 @@
         }
 
         function startMatrix() {
-            const canvas = document.getElementById('matrix-canvas');
-            const ctx = canvas.getContext('2d');
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            const letters = ["L", "O", "G", "Y"];
-            const fontSize = 20;
-            const columns = canvas.width / fontSize;
-            const drops = Array(Math.floor(columns)).fill(1);
-            function draw() {
-                ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-                ctx.fillStyle = "#ff69b4";
-                ctx.font = fontSize + "px monospace";
-                for (let i = 0; i < drops.length; i++) {
-                    const text = letters[Math.floor(Math.random() * letters.length)];
-                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
-                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
+            const mCanvas = document.getElementById('matrix-canvas');
+            const mCtx = mCanvas.getContext('2d');
+            mCanvas.width = window.innerWidth; mCanvas.height = window.innerHeight;
+            const drops = Array(Math.floor(mCanvas.width/20)).fill(1);
+            window.mInterval = setInterval(() => {
+                mCtx.fillStyle = "rgba(0,0,0,0.05)"; mCtx.fillRect(0,0,mCanvas.width,mCanvas.height);
+                mCtx.fillStyle = "#ff69b4"; mCtx.font = "20px monospace";
+                drops.forEach((y, i) => {
+                    const text = "LOGY"[Math.floor(Math.random()*4)];
+                    mCtx.fillText(text, i*20, y*20);
+                    if(y*20 > mCanvas.height && Math.random() > 0.975) drops[i] = 0;
                     drops[i]++;
-                }
-            }
-            window.matrixInterval = setInterval(draw, 33);
+                });
+            }, 33);
         }
 
         function startCountdown() {
             const introText = document.getElementById('intro-text');
-            const seq = ["3", "2", "1", "HAPPY", "BIRTHDAY", "TO", "LOGY", "and my", "sweetheart"];
+            const seq = ["3", "2", "1", "HAPPY BIRTHDAY", "LOGY", "MY SWEETHEART"];
             let sIdx = 0;
             const sInterval = setInterval(() => {
                 sIdx++;
-                if(sIdx < seq.length) introText.innerText = seq[sIdx];
+                if(sIdx < seq.length) { introText.innerText = seq[sIdx]; } 
                 else {
-                    clearInterval(sInterval);
-                    clearInterval(window.matrixInterval);
+                    clearInterval(sInterval); clearInterval(window.mInterval);
                     document.getElementById('intro-screen').style.display = 'none';
                     showMainContent();
                 }
-            }, 1500); 
+            }, 2000); 
         }
 
         function showMainContent() {
-            const main = document.getElementById('main-content');
-            main.style.display = 'flex';
-            setTimeout(() => main.style.opacity = '1', 50);
+            const mc = document.getElementById('main-content');
+            mc.style.display = 'flex';
+            setTimeout(() => mc.style.opacity = '1', 50);
             initStars();
         }
 
-        // قائمة متنوعة وطويلة من الشعر العربي
+        function initStars() {
+            const sCanvas = document.getElementById('stars-canvas');
+            const sCtx = sCanvas.getContext('2d');
+            sCanvas.width = window.innerWidth; sCanvas.height = window.innerHeight;
+            let stars = [];
+            for(let i=0; i<60; i++) stars.push({x:Math.random()*sCanvas.width, y:Math.random()*sCanvas.height, r:Math.random()*1.2, s:Math.random()*0.3});
+            function animate() {
+                sCtx.clearRect(0,0,sCanvas.width,sCanvas.height);
+                sCtx.fillStyle = "white";
+                stars.forEach(s => {
+                    sCtx.beginPath(); sCtx.arc(s.x, s.y, s.r, 0, Math.PI*2); sCtx.fill();
+                    s.y -= s.s; if(s.y<0) s.y=sCanvas.height;
+                });
+                requestAnimationFrame(animate);
+            }
+            animate();
+        }
+
         const quotes = [
-            "أَمَرُّ عَلى الدِيارِ دِيارِ لَيلى<br>أُقَبِّلُ ذا الجِدارَ وَذا الجِدارا<br>وَما حُبُّ الدِيارِ شَغَفنَ قَلبي<br>وَلَكِن حُبُّ مَن سَكَنَ الدِيارا<br>أَرى الدُنيا لِمَن أَهوى فِداءً<br>وَكُلُّ الناسِ دونَ حبيبِيَ هَباءا",
-            
-            "لِعَينَيكِ ما يَلقى الفُؤادُ وَما لَقي<br>وَلِلحُبِّ مالم يَبقَ مِنّي وَما بَقي<br>وَما كُنتُ مِمَّن يَدخُلُ العِشقُ قَلبَهُ<br>وَلَكِنَّ مَن يُبصِر جُفونَكِ يَعشَقِ<br>فأنتِ الرضا والسُّخطُ والقربُ والنَّوى<br>وأنتِ الذي في كُلِّ حالٍ أُعَانِقُ",
-            
-            "وَلَقَد ذَكَرتُكِ وَالرِماحُ نَواهِلٌ<br>مِنّي وَبيضُ الهِندِ تَقطُرُ من دَمي<br>فَوَدَدتُ تَقليلَ السُيوفِ لأَنَّها<br>لَمَعَت كَبارِقِ ثَغرُكِ المُتَبَسِّمِ<br>يا لَيتَ شِعري هَل أَراكِ بِمَجلِسٍ<br>تَشفي بِهِ نَفسي وَيَبرَأُ مَظْلَمي",
-            
-            "أُعانِقُها وَالنَفسُ بَعدُ مَشوقَةٌ<br>إِلَيها وَهَل بَعدَ العِناقِ تَداني<br>وَأَلثُمُ فاها كَي تَموتَ حَزازَتي<br>فَيَشتَدُّ ما أَلقى مِنَ الهَيَمانِ<br>وَلَم أَرَ مِثلي مُستَهاماً بِحُبِّها<br>وَلا مِثلَها في الحُسنِ نِبراسَ زَمانِ",
-            
-            "يا ظَبيَةَ البانِ تَرعى في خَمائِلِهِ<br>لِيَهْنِكِ اليَومَ أَنَّ القَلبَ مَرعاكِ<br>تَسْتَعيرينَ بَرْداً مِنْ مَحاسِنِها<br>كَأَنَّما مِنْ جُفونِ العَيْنِ مَأواكِ<br>قَد كُنتُ أَحسَبُ أَنَّ القَلبَ مُمتَنِعٌ<br>حَتّى رَمَتْهُ بِسَهْمٍ مِنْ مَحَيّاكِ",
-            
-            "أحبُّكِ حُبَّينِ حُبَّ الهَوى<br>وحُبَّاً لأنَّكِ أهلٌ لِذاكا<br>فأمَّا الذي هوَ حُبُّ الهوى<br>فشُغلي بذِكْرِكِ عَمَّنْ سِواكا<br>وَلستُ على الشَّجوِ أشكو النَّوى<br>فأنتِ المُنَى وقصدي لِقاكا",
-            
-            "أغارُ عليكِ من عينِي ومنِّي<br>ومنكِ ومن زمانِكِ والمكانِ<br>ولو أني خبأتُكِ في عيوني<br>إلى يومِ القيامةِ ما كفاني<br>فأنتِ الروحُ في جسدي فكيفَ<br>أعيشُ إذا جفانيَ من رماني",
-            
-            "زدني بفرطِ الحبِّ فيكَ تحيُّراً<br>وارحمْ حشاً بلظى هواكَ تسعَّرا<br>وإذا سألتُكَ أنْ أراكَ حقيقةً<br>فاسمحْ ولا تجعلْ جوابي لنْ ترى<br>يا قلبُ أنتَ وعدتني في حُبِّهمْ<br>صبراً فحاذرْ أنْ تضيقَ وتضجرا",
-            
-            "أتاني هواها قبل أن أعرف الهوى<br>فصادف قلباً خالياً فتمكنا<br>ولو كان لي قلبان لعشت بواحدٍ<br>وخلّفت قلباً في هواكِ يعذبا<br>ولكنّ لي قلباً تملّكه الهوى<br>فلا العيش يصفو لي ولا الموتُ يَقربا",
-            
-            "عجبتُ لمن يقولُ ذكرتُ حِبي<br>وهل أنسى فأذكرُ ما نسيتُ<br>سقاني الحبُّ كأساً بعد كأسٍ<br>فما نفدَ الشرابُ وما رويتُ<br>أموتُ بحبِّكم وأعيشُ فيهِ<br>فيا ذُلّي لـكمْ وبكم عـلوتُ"
+            "أمرُّ على الديارِ ديارِ ليلى<br>أُقبِّلُ ذا الجدارَ وذا الجدارا",
+            "لعينيكِ ما يلقى الفؤادُ وما لقي<br>وللحبِّ مالمْ يبقَ منّي وما بقي",
+            "ولقد ذكرتكِ والرماحُ نواهلٌ<br>منّي وبيضُ الهندِ تقطرُ من دمي",
+            "يا ظبيةَ البانِ ترعى في خمائلهِ<br>ليهنكِ اليومَ أنَّ القلبَ مرعاكِ",
+            "تُحَدِّثُني الأحلامُ أنَّي أراكمُ<br>فيا لَيْتَ أحْلامَ المَنامِ يَقِينُ",
+            "فما غابَ عن عيني خيالُكِ لحظةً<br>ولا زالَ ذِكرُكِ في فؤادي يترددُ"
         ];
 
         const book = document.getElementById('book');
+        let currentZIndex = 100; // حل أزمة ترتيب الطبقات
+
+        function createSinglePage(imgSrc, quote, isEnd = false) {
+            const p = document.createElement('div');
+            p.className = 'page';
+            p.style.zIndex = currentZIndex--; // ترتيب الصفحات فوق بعض بدقة
+            
+            p.innerHTML = `
+                <div class="photo-layer">
+                    <img src="${imgSrc}" onerror="this.style.display='none'">
+                </div>
+                <div class="overlay"></div>
+                <div class="content-layer">
+                    <div class="quote-text">${quote}</div>
+                </div>
+            `;
+            
+            if(isEnd) {
+                p.onclick = boom;
+            } else {
+                p.onclick = function() {
+                    this.style.transform = "translateX(-110%) rotate(-10deg)";
+                    this.style.opacity = "0";
+                    // إخفاء الصفحة تماماً بعد ما تطير عشان متعملش زحمة
+                    setTimeout(() => this.style.display = "none", 600); 
+                };
+            }
+            return p;
+        }
+
+        // 1. إنشاء الغلاف (أول صفحة هتظهر)
+        book.appendChild(createSinglePage('p1.jpeg', "<h1 style='color:var(--pink); margin-bottom:10px;'>LOGY WORLD</h1><br>اضغطي لتقليب الصفحات"));
         
-        const cover = createPage('cover-front', 
-            `<h1>LOGY</h1>`, 
-            `<div class="quote-page">إِنَّ العُيونَ الَّتي في طَرفِها حَوَرٌ<br>قَتَلنَنا ثُمَّ لَم يُحيينَ قَتلينا<br>يَصرَعنَ ذا اللُبِّ حَتّى لا حِراكَ بِهِ<br>وَهُنَّ أَضعَفُ خَلقِ اللَهِ أَركانا<br>أنتِ المَلاذُ وأنتِ الحلمُ أجمَلهُ<br>يا مَن لَها يَنحَني الشِّعرُ تَلحينا</div>`
-        );
-        book.appendChild(cover);
-
-        for(let i=1; i<=10; i++) {
-            // التعديل هنا: نستخدم i-1 مباشرة للتأكد من أن كل صفحة تأخذ قصيدة مختلفة
-            const quoteIndex = (i-1) % quotes.length;
-            const p = createPage('', '', `<div class="quote-page">${quotes[quoteIndex]}</div>`);
-            const frontDiv = p.querySelector('.front');
-            frontDiv.style.backgroundImage = `url('p${i}.jpeg')`;
-            book.appendChild(p);
+        // 2. إنشاء الصفحات من 2 لـ 9
+        for(let i=2; i<=9; i++) { 
+            book.appendChild(createSinglePage(`p${i}.jpeg`, quotes[i % quotes.length])); 
         }
-
-        const end = createPage('end-page', 
-            `<button onclick="boom()" style="padding:15px 25px; background:var(--pink); border:none; color:white; border-radius:10px; cursor:pointer; font-weight:bold;">أطلق السحر</button>`, 
-            `<div class="quote-page">دائماً في قلبي<br>كُلُّ عَامٍ وَأَنْتِ المَلِكَة<br>وَكُلُّ عَامٍ وَحُبُّكِ فِي رُوحِي يَكْبُر</div>`
-        );
-        book.appendChild(end);
-
-        function createPage(cls, fContent, bContent) {
-            const div = document.createElement('div');
-            div.className = 'page ' + cls;
-            div.innerHTML = `<div class="front">${fContent}</div><div class="back">${bContent}</div>`;
-            div.onclick = function(e) {
-                if(e.target.tagName === 'BUTTON') return;
-                this.classList.toggle('flipped');
-                updateZIndex();
-            };
-            return div;
-        }
-
-        function updateZIndex() {
-            const pages = Array.from(document.querySelectorAll('.page'));
-            pages.forEach((p, i) => {
-                p.style.zIndex = p.classList.contains('flipped') ? i + 1 : pages.length - i;
-            });
-        }
-        updateZIndex();
-
-        function initStars() {
-            const c = document.getElementById('stars-canvas'); const ctx = c.getContext('2d');
-            c.width = window.innerWidth; c.height = window.innerHeight;
-            let stars = Array(150).fill().map(() => ({x:Math.random()*c.width, y:Math.random()*c.height, r:Math.random()*1.5, s:Math.random()*0.5}));
-            function anim() {
-                ctx.clearRect(0,0,c.width,c.height); ctx.fillStyle = "white";
-                stars.forEach(s => { ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, 7); ctx.fill(); s.y-=s.s; if(s.y<0) s.y=c.height; });
-                requestAnimationFrame(anim);
-            } anim();
-        }
+        
+        // 3. إنشاء الصفحة الأخيرة
+        book.appendChild(createSinglePage('p10.jpeg', "جاهزة للمفاجأة؟ اضغطي هنا ❤️", true));
 
         function boom() {
-            document.querySelector('.book-container').style.display = 'none';
-            const container = document.getElementById('heart-container');
-            container.style.display = 'block'; container.innerHTML = '';
-            for(let i=0; i<25; i++) {
-                const img = document.createElement('img'); img.className = 'heart-img';
-                img.src = `h${i}.jpeg`; img.onerror = function() { this.src='https://via.placeholder.com/100/ff69b4/ffffff?text=LOVE'; };
-                container.appendChild(img);
-                let t = (i / 25) * 6.28; let x = 16 * Math.pow(Math.sin(t), 3);
-                let y = -(13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t));
-                setTimeout(() => { img.style.opacity = "1"; img.style.left = `${x * 16}px`; img.style.top = `${y * 16}px`; }, i * 80);
-            }
-            setTimeout(() => { container.classList.add('pulsing'); document.getElementById('back-to-book-btn').style.display = 'block'; }, 3500);
+            document.getElementById('main-content').style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('main-content').style.display = 'none';
+                const container = document.getElementById('heart-container');
+                container.style.display = 'block';
+                container.innerHTML = '';
+                
+                const isMobile = window.innerWidth < 768;
+                const spread = isMobile ? 6 : 9; // تصغير المدى عشان القلب يبقى ملموم
+
+                for(let i=1; i<=25; i++) {
+                    const img = document.createElement('img');
+                    img.className = 'heart-img';
+                    img.src = `h${i}.jpeg`;
+                    img.onerror = function() { this.style.display='none'; };
+                    container.appendChild(img);
+
+                    let t = ((i-1) / 25) * Math.PI * 2;
+                    let x = 16 * Math.pow(Math.sin(t), 3);
+                    let y = -(13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t));
+
+                    setTimeout(() => {
+                        img.style.opacity = "1";
+                        img.style.left = `${x * spread}px`;
+                        img.style.top = `${y * spread}px`;
+                    }, i * 50);
+                }
+                setTimeout(() => { document.getElementById('back-to-book-btn').style.display = 'block'; }, 1800);
+            }, 500);
         }
 
         function returnToNotebook() {
+            // إخفاء القلوب وزرار العودة
             document.getElementById('heart-container').style.display = 'none';
             document.getElementById('back-to-book-btn').style.display = 'none';
-            document.querySelector('.book-container').style.display = 'block';
-            document.getElementById('heart-container').classList.remove('pulsing');
+            
+            // إظهار المحتوى تاني
+            const mc = document.getElementById('main-content');
+            mc.style.display = 'flex';
+            setTimeout(() => mc.style.opacity = '1', 50);
+            
+            // إرجاع كل الصفحات لمكانها وترتيبها
+            const pages = document.querySelectorAll('.page');
+            pages.forEach(p => {
+                p.style.display = 'block';
+                // انتظار بسيط عشان الـ display:block يشتغل قبل الـ animation
+                setTimeout(() => {
+                    p.style.transform = "none";
+                    p.style.opacity = "1";
+                }, 50);
+            });
         }
 
-        function toggleM() { audio.paused ? (audio.play(), pBtn.innerText="⏸") : (audio.pause(), pBtn.innerText="▶"); }
-        function nextS() { cur=(cur+1)%5; audio.src=tracks[cur]; audio.play(); pBtn.innerText="⏸"; }
-        function prevS() { cur=(cur-1+5)%5; audio.src=tracks[cur]; audio.play(); pBtn.innerText="⏸"; }
+        function toggleM() {
+            if(audio.paused) { audio.play(); document.getElementById('pBtn').innerText="⏸"; }
+            else { audio.pause(); document.getElementById('pBtn').innerText="▶"; }
+        }
+        function nextS() { cur=(cur+1)%5; audio.src=tracks[cur]; audio.play(); }
+        function prevS() { cur=(cur-1+5)%5; audio.src=tracks[cur]; audio.play(); }
     </script>
 </body>
 </html>
